@@ -63,7 +63,7 @@ jobs:
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
         
-        echo "Building for architectures: linux/amd64, linux/arm64"
+        echo "Building for architectures: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6"
         echo "Docker tag: $DOCKER_TAG"
         echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
@@ -85,19 +85,18 @@ jobs:
         echo "Checking Dockerfile..."
         head -20 Dockerfile
         
-        # Build and push for fewer architectures first (for testing)
+        # Build and push for all target architectures
         echo "Starting multi-arch build..."
         echo "Build start time: $(date)"
         
         # Set buildx to use more memory and parallel builds
         export DOCKER_BUILDKIT=1
         
-        docker buildx build --platform linux/amd64,linux/arm64 \
+        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
           -t ghcr.io/m2sh/ha-addon-glutun:$DOCKER_TAG \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
           --push \
-          --progress=plain \
-          --no-cache .
+          --progress=plain .
         
         echo "Build completed successfully at: $(date)"
         

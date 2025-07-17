@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       gluetun_version:
-        description: 'Gluetun version to build (e.g., v3.45.0)'
+        description: 'Gluetun version to build (e.g., v3.40.0)'
         required: false
         default: ''
 
@@ -95,14 +95,46 @@ jobs:
         sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$VERSION/" Dockerfile
         
     - name: Build and push Docker image
+      timeout-minutes: 45
       run: |
         VERSION="${{ steps.version.outputs.version_num }}"
         
+        echo "Building for architectures: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6"
+        echo "Docker tag: $VERSION"
+        echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
+        
+        # Debug: Check Docker buildx setup
+        echo "Checking Docker buildx setup..."
+        docker buildx ls
+        docker buildx inspect --bootstrap
+        
+        # Debug: Check available resources
+        echo "Checking available resources..."
+        df -h
+        free -h
+        
+        # Debug: Check if we can access the registry
+        echo "Testing registry access..."
+        docker pull hello-world:latest || echo "Warning: Could not pull hello-world"
+        
+        # Debug: Check Dockerfile
+        echo "Checking Dockerfile..."
+        head -20 Dockerfile
+        
         # Build for multiple architectures
+        echo "Starting multi-arch build..."
+        echo "Build start time: $(date)"
+        
+        # Set buildx to use more memory and parallel builds
+        export DOCKER_BUILDKIT=1
+        
         docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
           -t ghcr.io/m2sh/ha-addon-glutun:$VERSION \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
-          --push .
+          --push \
+          --progress=plain .
+        
+        echo "Build completed successfully at: $(date)"
         
     - name: Create Git tag
       run: |
