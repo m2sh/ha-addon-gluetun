@@ -58,52 +58,50 @@ jobs:
         GLUETUN_VERSION="${{ steps.version.outputs.gluetun_version }}"
         sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$GLUETUN_VERSION/" Dockerfile
         
-    - name: Build and push Docker image
+    - name: Build and push Docker image (multi-arch)
       timeout-minutes: 30
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
         
-        echo "Building for architecture: linux/amd64"
+        echo "Building for architectures: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6"
         echo "Docker tag: $DOCKER_TAG"
         echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
-        # Test Docker login
-        echo "Testing Docker login..."
-        docker info
-        
-        # Test build without push first
-        echo "Testing build without push..."
-        docker buildx build --platform linux/amd64 \
-          -t test-build:latest \
-          --load .
-        
-        echo "Build test successful! Now building for registry..."
-        
-        # Build for single architecture first (for testing)
-        docker buildx build --platform linux/amd64 \
+        # Build and push for all target architectures
+        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
           -t ghcr.io/m2sh/ha-addon-glutun:$DOCKER_TAG \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
           --push .
         
+    - name: Delete existing Git tag if present
+      run: |
+        DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
+        TAG="v$DOCKER_TAG"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        if git tag -l | grep -q "$TAG"; then
+          echo "Tag $TAG already exists, deleting it locally and remotely..."
+          git tag -d "$TAG"
+          git push origin :refs/tags/$TAG || true
+        else
+          echo "Tag $TAG does not exist, continuing."
+        fi
     - name: Create Git tag
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
         GLUETUN_VERSION="${{ steps.version.outputs.gluetun_version }}"
-        
+        TAG="v$DOCKER_TAG"
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-        
-        # Create tag
-        git tag -a v$DOCKER_TAG -m "Manual release v$DOCKER_TAG - Gluetun $GLUETUN_VERSION"
-        git push origin v$DOCKER_TAG
-        
+        git tag -a "$TAG" -m "Manual release $TAG - Gluetun $GLUETUN_VERSION"
+        git push origin "$TAG"
     - name: Create GitHub release
       uses: actions/create-release@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ steps.version.outputs.docker_tag }}
-        release_name: Manual Release v${{ steps.version.outputs.docker_tag }}
+        release_name: Release v${{ steps.version.outputs.docker_tag }}
         body: |
           ## Manual Release
           
