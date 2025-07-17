@@ -92,7 +92,7 @@ jobs:
     - name: Update Dockerfile with Gluetun version
       run: |
         VERSION="${{ steps.version.outputs.version_num }}"
-        sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$VERSION/" Dockerfile.local
+        sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$VERSION/" Dockerfile
         
     - name: Build and push Docker image
       run: |
