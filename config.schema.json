@@ -1,0 +1,93 @@
+{
+  "vpn_provider": {
+    "name": "VPN Provider",
+    "type": "select",
+    "options": [
+      {"label": "Select a provider...", "value": ""},
+      {"label": "AirVPN", "value": "airvpn"},
+      {"label": "Cyberghost", "value": "cyberghost"},
+      {"label": "ExpressVPN", "value": "expressvpn"},
+      {"label": "FastestVPN", "value": "fastestvpn"},
+      {"label": "Giganews", "value": "giganews"},
+      {"label": "HideMyAss", "value": "hidemyass"},
+      {"label": "IPVanish", "value": "ipvanish"},
+      {"label": "IVPN", "value": "ivpn"},
+      {"label": "Mullvad", "value": "mullvad"},
+      {"label": "NordVPN", "value": "nordvpn"},
+      {"label": "Perfect Privacy", "value": "perfectprivacy"},
+      {"label": "Privado", "value": "privado"},
+      {"label": "Private Internet Access", "value": "privateinternetaccess"},
+      {"label": "PrivateVPN", "value": "privatevpn"},
+      {"label": "ProtonVPN", "value": "protonvpn"},
+      {"label": "PureVPN", "value": "purevpn"},
+      {"label": "SlickVPN", "value": "slickvpn"},
+      {"label": "Surfshark", "value": "surfshark"},
+      {"label": "TorGuard", "value": "torguard"},
+      {"label": "VPNSecure.me", "value": "vpnsecure"},
+      {"label": "VPNUnlimited", "value": "vpnunlimited"},
+      {"label": "Vyprvpn", "value": "vyprvpn"},
+      {"label": "WeVPN", "value": "wevpn"},
+      {"label": "Windscribe", "value": "windscribe"}
+    ],
+    "required": true
+  },
+  "vpn_type": {
+    "name": "VPN Type",
+    "type": "select",
+    "options": [
+      {"label": "OpenVPN", "value": "openvpn"},
+      {"label": "Wireguard", "value": "wireguard"}
+    ],
+    "default": "openvpn"
+  },
+  "openvpn_user": {
+    "name": "OpenVPN Username",
+    "type": "string",
+    "required": false
+  },
+  "openvpn_password": {
+    "name": "OpenVPN Password",
+    "type": "string",
+    "required": false
+  },
+  "wireguard_private_key": {
+    "name": "Wireguard Private Key",
+    "type": "string",
+    "required": false
+  },
+  "wireguard_addresses": {
+    "name": "Wireguard Addresses",
+    "type": "string",
+    "required": false,
+    "placeholder": "e.g., 10.64.222.21/32"
+  },
+  "shadowsocks_enabled": {
+    "name": "Enable Shadowsocks Proxy",
+    "type": "boolean",
+    "default": false
+  },
+  "http_proxy_enabled": {
+    "name": "Enable HTTP Proxy",
+    "type": "boolean",
+    "default": false
+  },
+  "http_proxy_port": {
+    "name": "HTTP Proxy Port",
+    "type": "integer",
+    "default": 8888,
+    "minimum": 1024,
+    "maximum": 65535
+  },
+  "dns_providers": {
+    "name": "DNS Providers",
+    "type": "string",
+    "required": false,
+    "placeholder": "e.g., cloudflare,google,quad9"
+  },
+  "tz": {
+    "name": "Timezone",
+    "type": "string",
+    "required": false,
+    "placeholder": "e.g., America/New_York"
+  }
+} 

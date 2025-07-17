@@ -1,0 +1,40 @@
+name: "Gluetun VPN"
+version: "1.0.0"
+slug: "gluetun"
+description: "VPN client for multiple providers with proxy services"
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
+startup: application
+init: false
+ports:
+  8888/tcp: 8888
+  8388/tcp: 8388
+  8388/udp: 8388
+devices:
+  - /dev/net/tun
+volumes:
+  data: /gluetun
+map:
+  - config:rw
+  - ssl:rw
+  - addons:rw
+  - share:rw
+  - backup:rw
+  - media:rw
+  - ssl:rw
+  - addons:rw
+  - share:rw
+  - backup:rw
+  - media:rw
+  - data:rw
+webui: "http://[HOST]:[PORT:8888]"
+ingress: true
+ingress_port: 8888
+panel_icon: mdi:vpn
+homeassistant_api: true
+hassio_api: true
+hassio_role: manager 

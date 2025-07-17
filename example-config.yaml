@@ -1,0 +1,24 @@
+# Example configuration for Gluetun VPN Home Assistant Addon
+
+# VPN Configuration
+vpn_provider: "nordvpn"
+vpn_type: "openvpn"
+openvpn_user: "your_nordvpn_username"
+openvpn_password: "your_nordvpn_password"
+
+# Wireguard Configuration (alternative to OpenVPN)
+# vpn_provider: "mullvad"
+# vpn_type: "wireguard"
+# wireguard_private_key: "your_private_key_here"
+# wireguard_addresses: "10.64.222.21/32"
+
+# Proxy Services
+shadowsocks_enabled: true
+http_proxy_enabled: true
+http_proxy_port: 8888
+
+# DNS Configuration
+dns_providers: "cloudflare,google,quad9"
+
+# General Settings
+tz: "America/New_York" 
