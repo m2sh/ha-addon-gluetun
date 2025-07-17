@@ -56,6 +56,13 @@ jobs:
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
         
+        # Check if tag already exists
+        if git tag -l | grep -q "v$DOCKER_TAG"; then
+          echo "Tag v$DOCKER_TAG already exists, deleting it..."
+          git tag -d v$DOCKER_TAG
+          git push origin :refs/tags/v$DOCKER_TAG || true
+        fi
+        
         # Create tag
         git tag -a v$DOCKER_TAG -m "Release v$DOCKER_TAG - Gluetun $GLUETUN_VERSION"
         git push origin v$DOCKER_TAG
