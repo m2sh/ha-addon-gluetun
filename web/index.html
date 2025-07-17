@@ -5,151 +5,239 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gluetun VPN Configuration</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background-color: #f5f5f5;
         }
+
         .container {
             max-width: 800px;
             margin: 0 auto;
             background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
             overflow: hidden;
         }
+
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 20px;
+            padding: 30px;
             text-align: center;
         }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
         .content {
             padding: 30px;
         }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e1e5e9;
+            border-radius: 8px;
+            background: #f8f9fa;
+        }
+
+        .section h3 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
         .form-group {
             margin-bottom: 20px;
         }
-        label {
+
+        .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             font-weight: 600;
-            color: #333;
+            color: #2c3e50;
         }
-        select, input, textarea {
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
             font-size: 14px;
-            box-sizing: border-box;
+            transition: border-color 0.3s ease;
         }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
         .checkbox-group {
             display: flex;
             align-items: center;
             gap: 10px;
         }
+
         .checkbox-group input[type="checkbox"] {
             width: auto;
+            margin: 0;
         }
-        .section {
-            border: 1px solid #eee;
-            border-radius: 6px;
-            padding: 20px;
-            margin-bottom: 20px;
+
+        .checkbox-group label {
+            margin: 0;
+            cursor: pointer;
         }
-        .section h3 {
-            margin-top: 0;
-            color: #333;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 10px;
-        }
-        .status {
-            padding: 15px;
-            border-radius: 4px;
-            margin-bottom: 20px;
-        }
-        .status.connected {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .status.disconnected {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
+
         .btn {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 12px 24px;
+            padding: 15px 30px;
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
         }
+
         .btn:hover {
-            opacity: 0.9;
+            transform: translateY(-2px);
         }
-        .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-        .metric {
-            background: #f8f9fa;
+
+        .status {
             padding: 15px;
             border-radius: 6px;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .provider-info {
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .provider-info h4 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .provider-info p {
+            color: #424242;
+            line-height: 1.5;
+        }
+
+        .field-group {
+            display: none;
+        }
+
+        .field-group.visible {
+            display: block;
+        }
+
+        .required {
+            color: #e74c3c;
+        }
+
+        .optional {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .help-text {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+
+        .protocol-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .protocol-toggle label {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e1e5e9;
+            border-radius: 6px;
             text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
         }
-        .metric-value {
-            font-size: 24px;
-            font-weight: bold;
-            color: #667eea;
+
+        .protocol-toggle input[type="radio"] {
+            display: none;
         }
-        .metric-label {
-            font-size: 12px;
-            color: #666;
-            text-transform: uppercase;
+
+        .protocol-toggle input[type="radio"]:checked + label {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔒 Gluetun VPN Configuration</h1>
-            <p>Configure your VPN connection and proxy services</p>
+            <h1>🔒 Gluetun VPN</h1>
+            <p>Advanced VPN Configuration for Home Assistant</p>
         </div>
-        
+
         <div class="content">
             <div id="status" class="status disconnected">
-                <strong>Status:</strong> <span id="status-text">Disconnected</span>
+                <span id="status-text">Disconnected</span>
             </div>
-            
-            <div class="metrics">
-                <div class="metric">
-                    <div class="metric-value" id="server">-</div>
-                    <div class="metric-label">Connected Server</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value" id="uptime">-</div>
-                    <div class="metric-label">Uptime</div>
-                </div>
-                <div class="metric">
-                    <div class="metric-value" id="ip">-</div>
-                    <div class="metric-label">Public IP</div>
-                </div>
+
+            <div id="provider-info" class="provider-info">
+                <h4 id="provider-name">Provider Information</h4>
+                <p id="provider-description"></p>
             </div>
 
             <form id="config-form">
                 <div class="section">
-                    <h3>VPN Configuration</h3>
+                    <h3>🔐 VPN Provider Configuration</h3>
                     
                     <div class="form-group">
-                        <label for="vpn_provider">VPN Provider:</label>
+                        <label for="vpn_provider">VPN Provider <span class="required">*</span></label>
                         <select id="vpn_provider" name="vpn_provider" required>
                             <option value="">Select a provider...</option>
                             <option value="airvpn">AirVPN</option>
@@ -179,44 +267,77 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label for="vpn_type">VPN Type:</label>
-                        <select id="vpn_type" name="vpn_type" required>
-                            <option value="openvpn">OpenVPN</option>
-                            <option value="wireguard">Wireguard</option>
-                        </select>
+                    <div class="protocol-toggle">
+                        <input type="radio" id="openvpn" name="vpn_type" value="openvpn" checked>
+                        <label for="openvpn">OpenVPN</label>
+                        <input type="radio" id="wireguard" name="vpn_type" value="wireguard">
+                        <label for="wireguard">Wireguard</label>
                     </div>
 
-                    <div id="openvpn-config">
+                    <!-- OpenVPN Configuration -->
+                    <div id="openvpn-config" class="field-group visible">
                         <div class="form-group">
-                            <label for="openvpn_user">OpenVPN Username:</label>
+                            <label for="openvpn_user">OpenVPN Username <span class="required">*</span></label>
                             <input type="text" id="openvpn_user" name="openvpn_user" placeholder="Enter your OpenVPN username">
+                            <div class="help-text">Your VPN provider username</div>
                         </div>
                         <div class="form-group">
-                            <label for="openvpn_password">OpenVPN Password:</label>
+                            <label for="openvpn_password">OpenVPN Password <span class="required">*</span></label>
                             <input type="password" id="openvpn_password" name="openvpn_password" placeholder="Enter your OpenVPN password">
+                            <div class="help-text">Your VPN provider password</div>
                         </div>
                     </div>
 
-                    <div id="wireguard-config" style="display: none;">
+                    <!-- Wireguard Configuration -->
+                    <div id="wireguard-config" class="field-group">
                         <div class="form-group">
-                            <label for="wireguard_private_key">Wireguard Private Key:</label>
+                            <label for="wireguard_private_key">Wireguard Private Key <span class="required">*</span></label>
                             <textarea id="wireguard_private_key" name="wireguard_private_key" rows="3" placeholder="Enter your Wireguard private key"></textarea>
+                            <div class="help-text">Your Wireguard private key (starts with 'private_key = ')</div>
                         </div>
                         <div class="form-group">
-                            <label for="wireguard_addresses">Wireguard Addresses:</label>
+                            <label for="wireguard_addresses">Wireguard Addresses <span class="required">*</span></label>
                             <input type="text" id="wireguard_addresses" name="wireguard_addresses" placeholder="e.g., 10.64.222.21/32">
+                            <div class="help-text">Your Wireguard IP address and subnet</div>
                         </div>
                     </div>
+
+                    <!-- Provider-specific fields -->
+                    <div id="provider-specific-fields"></div>
                 </div>
 
                 <div class="section">
-                    <h3>Proxy Services</h3>
+                    <h3>🌐 Proxy Services</h3>
                     
                     <div class="form-group">
                         <div class="checkbox-group">
                             <input type="checkbox" id="shadowsocks_enabled" name="shadowsocks_enabled">
                             <label for="shadowsocks_enabled">Enable Shadowsocks Proxy</label>
+                        </div>
+                        <div class="help-text">Creates a Shadowsocks proxy server for other applications</div>
+                    </div>
+
+                    <div id="shadowsocks-config" class="field-group">
+                        <div class="form-group">
+                            <label for="shadowsocks_port">Shadowsocks Port <span class="optional">(optional)</span></label>
+                            <input type="number" id="shadowsocks_port" name="shadowsocks_port" value="8388" min="1024" max="65535">
+                            <div class="help-text">Port for Shadowsocks proxy (default: 8388)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="shadowsocks_password">Shadowsocks Password <span class="optional">(optional)</span></label>
+                            <input type="password" id="shadowsocks_password" name="shadowsocks_password" placeholder="Leave empty for default password">
+                            <div class="help-text">Password for Shadowsocks proxy (default: gluetun)</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="shadowsocks_method">Encryption Method <span class="optional">(optional)</span></label>
+                            <select id="shadowsocks_method" name="shadowsocks_method">
+                                <option value="aes-256-gcm">AES-256-GCM</option>
+                                <option value="aes-128-gcm">AES-128-GCM</option>
+                                <option value="chacha20-poly1305">ChaCha20-Poly1305</option>
+                                <option value="aes-256-cfb">AES-256-CFB</option>
+                                <option value="aes-128-cfb">AES-128-CFB</option>
+                            </select>
+                            <div class="help-text">Encryption method for Shadowsocks (default: AES-256-GCM)</div>
                         </div>
                     </div>
 
@@ -225,40 +346,120 @@
                             <input type="checkbox" id="http_proxy_enabled" name="http_proxy_enabled">
                             <label for="http_proxy_enabled">Enable HTTP Proxy</label>
                         </div>
+                        <div class="help-text">Creates an HTTP proxy server for other applications</div>
                     </div>
 
-                    <div id="http_proxy_port_group" style="display: none;">
+                    <div id="http-proxy-config" class="field-group">
                         <div class="form-group">
-                            <label for="http_proxy_port">HTTP Proxy Port:</label>
+                            <label for="http_proxy_port">HTTP Proxy Port <span class="optional">(optional)</span></label>
                             <input type="number" id="http_proxy_port" name="http_proxy_port" value="8888" min="1024" max="65535">
+                            <div class="help-text">Port for HTTP proxy (default: 8888)</div>
                         </div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <h3>DNS Configuration</h3>
+                    <h3>🔍 DNS Configuration</h3>
                     
                     <div class="form-group">
-                        <label for="dns_providers">DNS Providers (comma-separated):</label>
+                        <label for="dns_providers">DNS Providers <span class="optional">(optional)</span></label>
                         <input type="text" id="dns_providers" name="dns_providers" placeholder="e.g., cloudflare, google, quad9">
+                        <div class="help-text">Comma-separated list of DNS providers for DNS over TLS</div>
                     </div>
                 </div>
 
                 <div class="section">
-                    <h3>General Settings</h3>
+                    <h3>⚙️ General Settings</h3>
                     
                     <div class="form-group">
-                        <label for="tz">Timezone:</label>
+                        <label for="tz">Timezone <span class="optional">(optional)</span></label>
                         <input type="text" id="tz" name="tz" placeholder="e.g., America/New_York">
+                        <div class="help-text">Timezone for the container (e.g., America/New_York, Europe/London)</div>
                     </div>
                 </div>
 
-                <button type="submit" class="btn">Save Configuration</button>
+                <button type="submit" class="btn">💾 Save Configuration</button>
             </form>
         </div>
     </div>
 
     <script>
+        // Provider information and configuration
+        const providerConfig = {
+            nordvpn: {
+                name: "NordVPN",
+                description: "NordVPN supports both OpenVPN and Wireguard protocols. For OpenVPN, use your NordVPN credentials. For Wireguard, you'll need to generate configuration files from the NordVPN app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            mullvad: {
+                name: "Mullvad",
+                description: "Mullvad primarily uses Wireguard. You'll need to generate your Wireguard configuration from the Mullvad website.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            windscribe: {
+                name: "Windscribe",
+                description: "Windscribe supports both OpenVPN and Wireguard. Use your Windscribe credentials for OpenVPN, or generate Wireguard configuration from the Windscribe website.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            protonvpn: {
+                name: "ProtonVPN",
+                description: "ProtonVPN supports both OpenVPN and Wireguard. Use your ProtonVPN credentials for OpenVPN, or generate Wireguard configuration from the ProtonVPN app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            surfshark: {
+                name: "Surfshark",
+                description: "Surfshark supports both OpenVPN and Wireguard. Use your Surfshark credentials for OpenVPN, or generate Wireguard configuration from the Surfshark app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            expressvpn: {
+                name: "ExpressVPN",
+                description: "ExpressVPN primarily uses OpenVPN. Use your ExpressVPN credentials.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: []
+                }
+            },
+            cyberghost: {
+                name: "CyberGhost",
+                description: "CyberGhost supports both OpenVPN and Wireguard. Use your CyberGhost credentials for OpenVPN, or generate Wireguard configuration from the CyberGhost app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            ipvanish: {
+                name: "IPVanish",
+                description: "IPVanish supports both OpenVPN and Wireguard. Use your IPVanish credentials for OpenVPN, or generate Wireguard configuration from the IPVanish app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            },
+            privateinternetaccess: {
+                name: "Private Internet Access",
+                description: "PIA supports both OpenVPN and Wireguard. Use your PIA credentials for OpenVPN, or generate Wireguard configuration from the PIA app.",
+                fields: {
+                    openvpn: ["openvpn_user", "openvpn_password"],
+                    wireguard: ["wireguard_private_key", "wireguard_addresses"]
+                }
+            }
+        };
+
         // Load current configuration
         async function loadConfig() {
             try {
@@ -274,70 +475,106 @@
                 document.getElementById('wireguard_addresses').value = config.wireguard_addresses || '';
                 document.getElementById('shadowsocks_enabled').checked = config.shadowsocks_enabled || false;
                 document.getElementById('http_proxy_enabled').checked = config.http_proxy_enabled || false;
+                document.getElementById('shadowsocks_port').value = config.shadowsocks_port || '8388';
+                document.getElementById('shadowsocks_password').value = config.shadowsocks_password || '';
+                document.getElementById('shadowsocks_method').value = config.shadowsocks_method || 'aes-256-gcm';
                 document.getElementById('http_proxy_port').value = config.http_proxy_port || '8888';
                 document.getElementById('dns_providers').value = config.dns_providers || '';
                 document.getElementById('tz').value = config.tz || '';
                 
                 updateConfigVisibility();
+                updateProviderInfo();
             } catch (error) {
                 console.error('Failed to load configuration:', error);
             }
         }
 
-        // Update form visibility based on VPN type
+        // Update form visibility based on VPN type and provider
         function updateConfigVisibility() {
-            const vpnType = document.getElementById('vpn_type').value;
-            const openvpnConfig = document.getElementById('openvpn-config');
-            const wireguardConfig = document.getElementById('wireguard-config');
+            const vpnType = document.querySelector('input[name="vpn_type"]:checked').value;
+            const provider = document.getElementById('vpn_provider').value;
             
-            if (vpnType === 'openvpn') {
-                openvpnConfig.style.display = 'block';
-                wireguardConfig.style.display = 'none';
-            } else {
-                openvpnConfig.style.display = 'none';
-                wireguardConfig.style.display = 'block';
+            // Show/hide protocol-specific configs
+            document.getElementById('openvpn-config').classList.toggle('visible', vpnType === 'openvpn');
+            document.getElementById('wireguard-config').classList.toggle('visible', vpnType === 'wireguard');
+            
+            // Show/hide proxy configs
+            document.getElementById('shadowsocks-config').classList.toggle('visible', document.getElementById('shadowsocks_enabled').checked);
+            document.getElementById('http-proxy-config').classList.toggle('visible', document.getElementById('http_proxy_enabled').checked);
+            
+            // Update provider-specific fields
+            updateProviderSpecificFields(provider, vpnType);
+        }
+
+        // Update provider-specific fields
+        function updateProviderSpecificFields(provider, vpnType) {
+            const container = document.getElementById('provider-specific-fields');
+            container.innerHTML = '';
+            
+            if (provider && providerConfig[provider]) {
+                const config = providerConfig[provider];
+                const fields = config.fields[vpnType] || [];
+                
+                if (fields.length > 0) {
+                    const section = document.createElement('div');
+                    section.className = 'field-group visible';
+                    section.innerHTML = `
+                        <h4>${config.name} Specific Configuration</h4>
+                        <div class="help-text">Additional configuration options for ${config.name}</div>
+                    `;
+                    container.appendChild(section);
+                }
             }
         }
 
-        // Update HTTP proxy port visibility
-        function updateProxyVisibility() {
-            const httpProxyEnabled = document.getElementById('http_proxy_enabled').checked;
-            const httpProxyPortGroup = document.getElementById('http_proxy_port_group');
+        // Update provider information
+        function updateProviderInfo() {
+            const provider = document.getElementById('vpn_provider').value;
+            const infoDiv = document.getElementById('provider-info');
+            const nameDiv = document.getElementById('provider-name');
+            const descDiv = document.getElementById('provider-description');
             
-            httpProxyPortGroup.style.display = httpProxyEnabled ? 'block' : 'none';
+            if (provider && providerConfig[provider]) {
+                const config = providerConfig[provider];
+                nameDiv.textContent = config.name;
+                descDiv.textContent = config.description;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
         }
 
-        // Load status and metrics
+        // Load status
         async function loadStatus() {
             try {
                 const response = await fetch('/api/status');
                 const status = await response.json();
                 
-                const statusElement = document.getElementById('status');
+                const statusDiv = document.getElementById('status');
                 const statusText = document.getElementById('status-text');
                 
                 if (status.connected) {
-                    statusElement.className = 'status connected';
-                    statusText.textContent = 'Connected';
+                    statusDiv.className = 'status connected';
+                    statusText.textContent = `Connected to ${status.server || 'VPN'}`;
                 } else {
-                    statusElement.className = 'status disconnected';
+                    statusDiv.className = 'status disconnected';
                     statusText.textContent = 'Disconnected';
                 }
-                
-                document.getElementById('server').textContent = status.server || '-';
-                document.getElementById('uptime').textContent = status.uptime || '-';
-                document.getElementById('ip').textContent = status.public_ip || '-';
             } catch (error) {
                 console.error('Failed to load status:', error);
             }
         }
 
-        // Handle form submission
+        // Save configuration
         document.getElementById('config-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
             const config = Object.fromEntries(formData.entries());
+            
+            // Convert checkbox values to boolean
+            config.shadowsocks_enabled = config.shadowsocks_enabled === 'on';
+            config.http_proxy_enabled = config.http_proxy_enabled === 'on';
             
             try {
                 const response = await fetch('/api/config', {
@@ -360,8 +597,17 @@
         });
 
         // Event listeners
-        document.getElementById('vpn_type').addEventListener('change', updateConfigVisibility);
-        document.getElementById('http_proxy_enabled').addEventListener('change', updateProxyVisibility);
+        document.getElementById('vpn_provider').addEventListener('change', function() {
+            updateConfigVisibility();
+            updateProviderInfo();
+        });
+
+        document.querySelectorAll('input[name="vpn_type"]').forEach(radio => {
+            radio.addEventListener('change', updateConfigVisibility);
+        });
+
+        document.getElementById('shadowsocks_enabled').addEventListener('change', updateConfigVisibility);
+        document.getElementById('http_proxy_enabled').addEventListener('change', updateConfigVisibility);
 
         // Initialize
         loadConfig();
