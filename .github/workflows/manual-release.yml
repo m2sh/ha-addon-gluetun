@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       gluetun_version:
-        description: 'Gluetun version to build (e.g., v3.45.0)'
+        description: 'Gluetun version to build (e.g., v3.40.0)'
         required: true
         type: string
       docker_tag:
@@ -59,11 +59,11 @@ jobs:
         sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$GLUETUN_VERSION/" Dockerfile
         
     - name: Build and push Docker image (multi-arch)
-      timeout-minutes: 30
+      timeout-minutes: 45
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
         
-        echo "Building for architectures: linux/amd64, linux/arm64, linux/arm/v7, linux/arm/v6"
+        echo "Building for architectures: linux/amd64, linux/arm64"
         echo "Docker tag: $DOCKER_TAG"
         echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
@@ -72,19 +72,34 @@ jobs:
         docker buildx ls
         docker buildx inspect --bootstrap
         
+        # Debug: Check available resources
+        echo "Checking available resources..."
+        df -h
+        free -h
+        
         # Debug: Check if we can access the registry
         echo "Testing registry access..."
         docker pull hello-world:latest || echo "Warning: Could not pull hello-world"
         
-        # Build and push for all target architectures
+        # Debug: Check Dockerfile
+        echo "Checking Dockerfile..."
+        head -20 Dockerfile
+        
+        # Build and push for fewer architectures first (for testing)
         echo "Starting multi-arch build..."
-        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+        echo "Build start time: $(date)"
+        
+        # Set buildx to use more memory and parallel builds
+        export DOCKER_BUILDKIT=1
+        
+        docker buildx build --platform linux/amd64,linux/arm64 \
           -t ghcr.io/m2sh/ha-addon-glutun:$DOCKER_TAG \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
           --push \
-          --progress=plain .
+          --progress=plain \
+          --no-cache .
         
-        echo "Build completed successfully!"
+        echo "Build completed successfully at: $(date)"
         
     - name: Delete existing Git tag if present
       run: |
