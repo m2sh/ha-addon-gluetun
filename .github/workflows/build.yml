@@ -36,7 +36,9 @@ jobs:
       with:
         name: docker-image
         path: |
-          Dockerfile.local
+          Dockerfile
           config.yaml
-          run
+          run.sh
+          startup.sh
+          gluetun-config.sh
         retention-days: 1 
