@@ -1,0 +1,29 @@
+name: Test Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+      
+    - name: Test Docker build
+      timeout-minutes: 15
+      run: |
+        echo "Testing Docker build..."
+        docker buildx build --platform linux/amd64 \
+          -t test-build:latest \
+          --load .
+        
+        echo "Build successful! Testing image..."
+        docker run --rm test-build:latest which gluetun
+        docker run --rm test-build:latest which python3
+        
+        echo "All tests passed!" 

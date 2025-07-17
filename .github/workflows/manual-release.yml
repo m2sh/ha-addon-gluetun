@@ -32,6 +32,7 @@ jobs:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
+      continue-on-error: true
         
     - name: Determine version
       id: version
@@ -69,6 +70,14 @@ jobs:
         # Test Docker login
         echo "Testing Docker login..."
         docker info
+        
+        # Test build without push first
+        echo "Testing build without push..."
+        docker buildx build --platform linux/amd64 \
+          -t test-build:latest \
+          --load .
+        
+        echo "Build test successful! Now building for registry..."
         
         # Build for single architecture first (for testing)
         docker buildx build --platform linux/amd64 \
