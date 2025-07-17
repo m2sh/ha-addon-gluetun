@@ -58,8 +58,13 @@ jobs:
         sed -i "s/ARG GLUETUN_VERSION=.*/ARG GLUETUN_VERSION=$GLUETUN_VERSION/" Dockerfile
         
     - name: Build and push Docker image
+      timeout-minutes: 30
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
+        
+        echo "Building for architectures: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+        echo "Docker tag: $DOCKER_TAG"
+        echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
         # Build for multiple architectures
         docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \

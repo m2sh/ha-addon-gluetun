@@ -34,9 +34,27 @@ fi
 if bashio::var.has_value "${shadowsocks_enabled}"; then
     if [ "${shadowsocks_enabled}" = "true" ]; then
         export SHADOWSOCKS_ENABLED="on"
-        export SHADOWSOCKS_PORT="8388"
-        export SHADOWSOCKS_PASSWORD="gluetun"
-        export SHADOWSOCKS_METHOD="aes-256-gcm"
+        
+        # Shadowsocks port
+        if bashio::var.has_value "${shadowsocks_port}"; then
+            export SHADOWSOCKS_PORT="${shadowsocks_port}"
+        else
+            export SHADOWSOCKS_PORT="8388"
+        fi
+        
+        # Shadowsocks password
+        if bashio::var.has_value "${shadowsocks_password}"; then
+            export SHADOWSOCKS_PASSWORD="${shadowsocks_password}"
+        else
+            export SHADOWSOCKS_PASSWORD="gluetun"
+        fi
+        
+        # Shadowsocks encryption method
+        if bashio::var.has_value "${shadowsocks_method}"; then
+            export SHADOWSOCKS_METHOD="${shadowsocks_method}"
+        else
+            export SHADOWSOCKS_METHOD="aes-256-gcm"
+        fi
     else
         export SHADOWSOCKS_ENABLED="off"
     fi

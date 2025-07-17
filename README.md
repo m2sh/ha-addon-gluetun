@@ -94,6 +94,9 @@ tz: "America/New_York"
 | `wireguard_private_key` | string | - | Wireguard private key |
 | `wireguard_addresses` | string | - | Wireguard IP addresses |
 | `shadowsocks_enabled` | boolean | `false` | Enable Shadowsocks proxy |
+| `shadowsocks_port` | number | `8388` | Shadowsocks proxy port |
+| `shadowsocks_password` | string | `gluetun` | Shadowsocks password |
+| `shadowsocks_method` | string | `aes-256-gcm` | Shadowsocks encryption method |
 | `http_proxy_enabled` | boolean | `false` | Enable HTTP proxy |
 | `http_proxy_port` | number | `8888` | HTTP proxy port |
 | `dns_providers` | string | - | DNS providers (comma-separated) |

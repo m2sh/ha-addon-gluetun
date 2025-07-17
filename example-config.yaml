@@ -14,6 +14,9 @@ openvpn_password: "your_nordvpn_password"
 
 # Proxy Services
 shadowsocks_enabled: true
+shadowsocks_port: 8388
+shadowsocks_password: "your_custom_password"
+shadowsocks_method: "aes-256-gcm"
 http_proxy_enabled: true
 http_proxy_port: 8888
 
