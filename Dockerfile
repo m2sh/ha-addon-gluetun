@@ -15,10 +15,24 @@ FROM alpine:3.20
 # Install s6-overlay
 ENV S6_OVERLAY_VERSION=v3.1.5.0
 ADD https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/
-ADD https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz /tmp/
 RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
-    rm -rf /tmp/s6-overlay-*.tar.xz
+    rm -rf /tmp/s6-overlay-noarch.tar.xz
+
+# Install architecture-specific s6-overlay
+ARG TARGETARCH
+RUN if [ "$TARGETARCH" = "amd64" ]; then \
+        wget -O /tmp/s6-overlay-x86_64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz && \
+        tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
+        rm -rf /tmp/s6-overlay-x86_64.tar.xz; \
+    elif [ "$TARGETARCH" = "arm64" ]; then \
+        wget -O /tmp/s6-overlay-aarch64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz && \
+        tar -C / -Jxpf /tmp/s6-overlay-aarch64.tar.xz && \
+        rm -rf /tmp/s6-overlay-aarch64.tar.xz; \
+    elif [ "$TARGETARCH" = "arm" ]; then \
+        wget -O /tmp/s6-overlay-armhf.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-armhf.tar.xz && \
+        tar -C / -Jxpf /tmp/s6-overlay-armhf.tar.xz && \
+        rm -rf /tmp/s6-overlay-armhf.tar.xz; \
+    fi
 
 # Install required packages
 RUN apk add --no-cache \
@@ -34,7 +48,8 @@ RUN apk add --no-cache \
     iptables \
     ip6tables \
     net-tools \
-    procps
+    procps \
+    wget
 
 # Install Python dependencies for our web API
 RUN pip3 install --break-system-packages flask-cors

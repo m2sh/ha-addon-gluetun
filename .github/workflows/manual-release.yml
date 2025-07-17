@@ -67,11 +67,24 @@ jobs:
         echo "Docker tag: $DOCKER_TAG"
         echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
+        # Debug: Check Docker buildx setup
+        echo "Checking Docker buildx setup..."
+        docker buildx ls
+        docker buildx inspect --bootstrap
+        
+        # Debug: Check if we can access the registry
+        echo "Testing registry access..."
+        docker pull hello-world:latest || echo "Warning: Could not pull hello-world"
+        
         # Build and push for all target architectures
+        echo "Starting multi-arch build..."
         docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
           -t ghcr.io/m2sh/ha-addon-glutun:$DOCKER_TAG \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
-          --push .
+          --push \
+          --progress=plain .
+        
+        echo "Build completed successfully!"
         
     - name: Delete existing Git tag if present
       run: |
