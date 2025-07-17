@@ -62,12 +62,16 @@ jobs:
       run: |
         DOCKER_TAG="${{ steps.version.outputs.docker_tag }}"
         
-        echo "Building for architectures: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+        echo "Building for architecture: linux/amd64"
         echo "Docker tag: $DOCKER_TAG"
         echo "Registry: ghcr.io/m2sh/ha-addon-glutun"
         
-        # Build for multiple architectures
-        docker buildx build --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6 \
+        # Test Docker login
+        echo "Testing Docker login..."
+        docker info
+        
+        # Build for single architecture first (for testing)
+        docker buildx build --platform linux/amd64 \
           -t ghcr.io/m2sh/ha-addon-glutun:$DOCKER_TAG \
           -t ghcr.io/m2sh/ha-addon-glutun:latest \
           --push .
