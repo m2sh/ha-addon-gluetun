@@ -1,39 +1,52 @@
-ARG BUILD_FROM
-FROM $BUILD_FROM
+# Multi-stage build for Gluetun from source
+ARG GLUETUN_VERSION=v3.40.0
+FROM golang:1.23-alpine AS builder
 
-# Install required packages
-RUN apk add --no-cache \
+# Install build dependencies
+RUN apk add --no-cache git
+
+# Build Gluetun from source
+RUN git clone --depth 1 --branch ${GLUETUN_VERSION} https://github.com/qdm12/gluetun.git /tmp/gluetun && \
+    cd /tmp/gluetun && \
+    go build -o /gluetun ./cmd/gluetun
+
+# Final stage - use Home Assistant base image
+ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
+FROM ${BUILD_FROM}
+
+# Install required packages based on official Gluetun Dockerfile
+RUN apk add --no-cache --update \
+    wget \
+    ca-certificates \
+    iptables \
+    iptables-legacy \
+    tzdata \
     python3 \
     py3-pip \
     py3-flask \
     py3-requests \
-    openvpn \
     wireguard-tools \
-    iptables \
-    ip6tables \
     net-tools \
-    procps \
-    unzip
+    procps
+
+# Install OpenVPN 2.5 and 2.6 like official Gluetun
+RUN apk add --no-cache --update -X "https://dl-cdn.alpinelinux.org/alpine/v3.17/main" openvpn~2.5 && \
+    mv /usr/sbin/openvpn /usr/sbin/openvpn2.5 && \
+    apk del openvpn && \
+    apk add --no-cache --update openvpn && \
+    mv /usr/sbin/openvpn /usr/sbin/openvpn2.6 && \
+    rm -rf /var/cache/apk/* /etc/openvpn/*.sh /usr/lib/openvpn/plugins/openvpn-plugin-down-root.so && \
+    deluser openvpn 2>/dev/null || true
 
 # Install Python dependencies for our web API
 RUN pip3 install --break-system-packages flask-cors
 
-# Download and install Gluetun binary
-ARG GLUETUN_VERSION=v3.40.0
-ARG TARGETARCH
-RUN case "${TARGETARCH}" in \
-        "amd64") GLUETUN_ARCH="amd64" ;; \
-        "arm64") GLUETUN_ARCH="arm64" ;; \
-        "arm/v7") GLUETUN_ARCH="armv7" ;; \
-        "arm/v6") GLUETUN_ARCH="armv6" ;; \
-        "386") GLUETUN_ARCH="386" ;; \
-        *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
-    esac && \
-    wget -O /tmp/gluetun.zip "https://github.com/qdm12/gluetun/releases/download/${GLUETUN_VERSION}/gluetun_${GLUETUN_VERSION}_linux_${GLUETUN_ARCH}.zip" && \
-    unzip /tmp/gluetun.zip -d /tmp/ && \
-    mv /tmp/gluetun /usr/local/bin/gluetun && \
-    chmod 755 /usr/local/bin/gluetun && \
-    rm -rf /tmp/gluetun.zip
+# Copy Gluetun binary from builder stage
+COPY --from=builder /gluetun /usr/local/bin/gluetun
+RUN chmod 755 /usr/local/bin/gluetun
+
+# Create gluetun directory like official image
+RUN mkdir -p /gluetun
 
 # Copy our integration files
 COPY run.sh /addon/run.sh
@@ -50,7 +63,28 @@ RUN chmod +x /etc/services.d/*/run
 WORKDIR /app
 
 # Expose ports
-EXPOSE 8888 8388
+EXPOSE 8888 8388 8000
+
+# Set environment variables similar to official Gluetun
+ENV VPN_SERVICE_PROVIDER=pia \
+    VPN_TYPE=openvpn \
+    VPN_INTERFACE=tun0 \
+    OPENVPN_VERSION=2.6 \
+    OPENVPN_VERBOSITY=1 \
+    OPENVPN_PROTOCOL=udp \
+    FIREWALL_ENABLED_DISABLING_IT_SHOOTS_YOU_IN_YOUR_FOOT=on \
+    LOG_LEVEL=info \
+    HEALTH_SERVER_ADDRESS=127.0.0.1:9999 \
+    HEALTH_TARGET_ADDRESS=cloudflare.com:443 \
+    DOT=on \
+    DOT_PROVIDERS=cloudflare \
+    HTTPPROXY=off \
+    SHADOWSOCKS=off \
+    HTTP_CONTROL_SERVER_ADDRESS=":8000" \
+    PUBLICIP_FILE="/tmp/gluetun/ip" \
+    PUBLICIP_ENABLED=on \
+    STORAGE_FILEPATH=/gluetun/servers.json \
+    VERSION_INFORMATION=on
 
 # Add Home Assistant labels
 LABEL \
