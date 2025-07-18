@@ -1,25 +1,10 @@
-# Multi-stage build for Gluetun from source
-ARG GLUETUN_VERSION=v3.40.0
-FROM golang:1.23-alpine AS builder
-
-# Install build dependencies
-RUN apk add --no-cache git
-
-# Re-declare ARG for this stage
-ARG GLUETUN_VERSION=v3.40.0
-
-# Build Gluetun from source
-RUN git clone --depth 1 --branch ${GLUETUN_VERSION} https://github.com/qdm12/gluetun.git /tmp/gluetun && \
-    cd /tmp/gluetun && \
-    go build -o /gluetun ./cmd/gluetun
-
-# Final stage - use Home Assistant base image
 ARG BUILD_FROM
 FROM $BUILD_FROM
 
-# Install required packages
-# curl, jq, and bash are pre-installed on the Home Assistant base image
+# Install build and runtime dependencies
 RUN apk add --no-cache --update \
+    go \
+    git \
     wget \
     ca-certificates \
     iptables \
@@ -33,7 +18,7 @@ RUN apk add --no-cache --update \
     net-tools \
     procps
 
-# Install OpenVPN 2.5 and 2.6 like official Gluetun
+# Install OpenVPN 2.5 and 2.6
 RUN apk add --no-cache --update -X "https://dl-cdn.alpinelinux.org/alpine/v3.17/main" openvpn~2.5 && \
     mv /usr/sbin/openvpn /usr/sbin/openvpn2.5 && \
     apk del openvpn && \
@@ -42,24 +27,28 @@ RUN apk add --no-cache --update -X "https://dl-cdn.alpinelinux.org/alpine/v3.17/
     rm -rf /var/cache/apk/* /etc/openvpn/*.sh /usr/lib/openvpn/plugins/openvpn-plugin-down-root.so && \
     deluser openvpn 2>/dev/null || true
 
-# Install Python dependencies for our web API
+# Install Python dependencies
 RUN pip3 install --break-system-packages flask-cors
 
-# Copy Gluetun binary from builder stage
-COPY --from=builder /gluetun /usr/local/bin/gluetun
-RUN chmod 755 /usr/local/bin/gluetun
+# Build Gluetun from source
+ARG GLUETUN_VERSION=v3.40.0
+RUN git clone --depth 1 --branch ${GLUETUN_VERSION} https://github.com/qdm12/gluetun.git /tmp/gluetun && \
+    cd /tmp/gluetun && \
+    go build -o /usr/local/bin/gluetun ./cmd/gluetun && \
+    chmod 755 /usr/local/bin/gluetun && \
+    rm -rf /tmp/gluetun
 
-# Create gluetun directory like official image
+# Create gluetun directory
 RUN mkdir -p /gluetun
 
-# Copy our integration files
+# Copy addon files
 COPY run.sh /addon/run.sh
 COPY startup.sh /addon/startup.sh
 COPY gluetun-config.sh /addon/gluetun-config.sh
 COPY web/ /web/
 RUN chmod a+x /addon/*.sh
 
-# s6 service definitions
+# Copy s6 services
 COPY s6-services/ /etc/services.d/
 RUN chmod +x /etc/services.d/*/run
 
@@ -69,7 +58,7 @@ WORKDIR /app
 # Expose ports
 EXPOSE 8888 8388 8000
 
-# Set environment variables similar to official Gluetun
+# Set environment variables
 ENV VPN_SERVICE_PROVIDER=pia \
     VPN_TYPE=openvpn \
     VPN_INTERFACE=tun0 \

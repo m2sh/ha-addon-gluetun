@@ -207,28 +207,21 @@ If the web interface doesn't work, you can manually edit the configuration:
 
 ### Building the Addon
 
-The repository uses a unified Dockerfile that is compatible with the official Home Assistant builder.
+The addon can be built locally for testing using Docker. You will need to provide a base image using the `BUILD_FROM` argument.
 
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd ha-addon-glutun
 
-# Local development build (requires specifying a base image)
-docker build --build-arg BUILD_FROM=alpine:3.20 --build-arg GLUETUN_VERSION=v3.40.0 -t gluetun-addon .
-
-# Home Assistant builder build (how the workflow builds it)
-docker build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest --build-arg GLUETUN_VERSION=v3.40.0 -t gluetun-addon .
+# Build the addon locally
+docker build --build-arg BUILD_FROM=alpine:3.20 -t gluetun-addon .
 
 # Test the container
 docker run --rm --cap-add=NET_ADMIN gluetun-addon which gluetun
 ```
 
-**Features**: 
-- **Unified Dockerfile**: A single file for both local development and Home Assistant.
-- **Multi-stage build**: Compiles Gluetun from source using Go 1.23 for optimal performance.
-- **Official dependencies**: Aligns with the official Gluetun Dockerfile structure.
-- **OpenVPN 2.5 & 2.6**: Both versions are installed for broad compatibility.
+**Note**: The Home Assistant builder will inject a specific base image for the architecture it's building for, so you don't need to specify it when the GitHub Actions workflow is running.
 
 ### GitHub Actions Setup
 
