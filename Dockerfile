@@ -24,7 +24,9 @@ ARG TARGETARCH
 RUN case "${TARGETARCH}" in \
         "amd64") GLUETUN_ARCH="amd64" ;; \
         "arm64") GLUETUN_ARCH="arm64" ;; \
-        "arm") GLUETUN_ARCH="armv6" ;; \
+        "arm/v7") GLUETUN_ARCH="armv7" ;; \
+        "arm/v6") GLUETUN_ARCH="armv6" ;; \
+        "386") GLUETUN_ARCH="386" ;; \
         *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
     esac && \
     wget -O /tmp/gluetun.zip "https://github.com/qdm12/gluetun/releases/download/${GLUETUN_VERSION}/gluetun_${GLUETUN_VERSION}_linux_${GLUETUN_ARCH}.zip" && \
