@@ -207,21 +207,29 @@ If the web interface doesn't work, you can manually edit the configuration:
 
 ### Building the Addon
 
+The repository uses a unified Dockerfile that works for both local development and Home Assistant builder:
+
 ```bash
 # Clone the repository
 git clone <repository-url>
 cd ha-addon-glutun
 
-# Build the addon locally (builds Gluetun from source)
-docker build -t gluetun-addon .
+# Local development build (uses Alpine base with s6-overlay)
+docker build --build-arg GLUETUN_VERSION=v3.40.0 -t gluetun-addon .
 
-# Or build using Home Assistant's build system
-docker build -t gluetun-addon .
+# Home Assistant builder build (uses HA base image)
+docker build --build-arg BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest --build-arg GLUETUN_VERSION=v3.40.0 -t gluetun-addon .
+
+# Test the container
+docker run --rm gluetun-addon which gluetun
 ```
 
-**Note**: 
-- The unified Dockerfile builds Gluetun from source and works for both local development and Home Assistant addon builds
-- All builds use the same Dockerfile with multi-stage build process
+**Features**: 
+- **Unified Dockerfile**: Single file for both local development and Home Assistant
+- **Multi-stage build**: Builds Gluetun from source using Go 1.23
+- **Smart fallback**: Automatically uses Alpine + s6-overlay for local development
+- **Official dependencies**: Matches official Gluetun Dockerfile structure
+- **OpenVPN 2.5 & 2.6**: Both versions installed like official Gluetun
 
 ### GitHub Actions Setup
 
