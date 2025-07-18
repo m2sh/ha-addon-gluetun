@@ -7,16 +7,12 @@ RUN apk add --no-cache \
     py3-pip \
     py3-flask \
     py3-requests \
-    curl \
-    jq \
-    bash \
     openvpn \
     wireguard-tools \
     iptables \
     ip6tables \
     net-tools \
     procps \
-    wget \
     unzip
 
 # Install Python dependencies for our web API
