@@ -1,0 +1,14 @@
+---
+channel: stable
+addons:
+  gluetun:
+    name: "Gluetun VPN"
+    description: "VPN client for multiple providers with proxy services"
+    url: "https://github.com/m2sh/ha-addon-gluetun"
+    arch:
+      - aarch64
+      - amd64
+      - armhf
+      - armv7
+      - i386
+    image: "ghcr.io/m2sh/ha-addon-gluetun/{arch}" 

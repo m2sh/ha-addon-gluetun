@@ -7,4 +7,6 @@ build_from:
   i386: ghcr.io/hassio-addons/base/i386:latest
 labels:
   io.hass.type: addon
-  io.hass.version: "1.0.0" 
+  io.hass.version: "1.0.0"
+  io.hass.name: "Gluetun VPN"
+  io.hass.description: "VPN client for multiple providers with proxy services" 

@@ -75,5 +75,18 @@ WORKDIR /app
 # Expose ports
 EXPOSE 8888 8388
 
+# Add Home Assistant labels
+LABEL \
+    io.hass.name="Gluetun VPN" \
+    io.hass.description="VPN client for multiple providers with proxy services" \
+    io.hass.arch="armhf|armv7|aarch64|amd64|i386" \
+    io.hass.type="addon" \
+    io.hass.version="1.0.0" \
+    maintainer="Mohammad Shahgolzadeh <m2sh>" \
+    org.opencontainers.image.title="Gluetun VPN" \
+    org.opencontainers.image.description="VPN client for multiple providers with proxy services" \
+    org.opencontainers.image.source="https://github.com/m2sh/ha-addon-gluetun" \
+    org.opencontainers.image.licenses="MIT"
+
 # Use s6-overlay as entrypoint
 ENTRYPOINT ["/init"] 

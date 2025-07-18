@@ -16,15 +16,8 @@ ports:
   8388/udp: 8388
 devices:
   - /dev/net/tun
-volumes:
-  data: /gluetun
 map:
   - config:rw
-  - ssl:rw
-  - addons:rw
-  - share:rw
-  - backup:rw
-  - media:rw
   - ssl:rw
   - addons:rw
   - share:rw

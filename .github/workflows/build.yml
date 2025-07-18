@@ -1,46 +1,56 @@
-name: Build and Test
+name: Build and Publish Add-on
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
+  release:
+    types: [published]
 
 jobs:
-  build:
+  test:
+    name: Test Build
     runs-on: ubuntu-latest
-    
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Test build
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --test \
+            --all \
+            --target . \
+            --docker-hub ghcr.io/m2sh
+
+  publish:
+    name: Publish Add-on
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       
-    - name: Build Docker image
-      timeout-minutes: 10
-      run: |
-        # Build for single architecture for testing (--load only works with single arch)
-        docker buildx build --platform linux/amd64 \
-          -t ha-addon-glutun:test \
-          --load .
-        
-    - name: Test Docker image
-      timeout-minutes: 5
-      run: |
-        # Test that the image can be created and basic structure is correct
-        docker run --rm ha-addon-glutun:test ls -la /usr/local/bin/
-        docker run --rm ha-addon-glutun:test which gluetun
-        docker run --rm ha-addon-glutun:test which python3
-        
-    - name: Upload build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: docker-image
-        path: |
-          Dockerfile
-          config.yaml
-          run.sh
-          startup.sh
-          gluetun-config.sh
-        retention-days: 1 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Publish add-on
+        uses: home-assistant/builder@master
+        with:
+          args: |
+            --all \
+            --target . \
+            --docker-hub ghcr.io/m2sh 

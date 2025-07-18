@@ -1,0 +1,3 @@
+[submodule ".github/workflows-shared"]
+	path = .github/workflows-shared
+	url = https://github.com/Poeschl-HomeAssistant-Addons/workflows.git
