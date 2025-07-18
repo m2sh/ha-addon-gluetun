@@ -1,38 +1,5 @@
-# Multi-stage build for Gluetun from source
-FROM golang:1.23-alpine AS builder
-
-RUN apk add --no-cache git
-
-# Build Gluetun from source (shallow clone)
-ARG GLUETUN_VERSION=v3.40.0
-RUN git clone --depth 1 --branch ${GLUETUN_VERSION} https://github.com/qdm12/gluetun.git /tmp/gluetun && \
-    cd /tmp/gluetun && \
-    go build -o /gluetun ./cmd/gluetun
-
-# Final stage
-FROM alpine:3.20
-
-# Install s6-overlay
-ENV S6_OVERLAY_VERSION=v3.1.5.0
-ADD https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz /tmp/
-RUN tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
-    rm -rf /tmp/s6-overlay-noarch.tar.xz
-
-# Install architecture-specific s6-overlay
-ARG TARGETARCH
-RUN if [ "$TARGETARCH" = "amd64" ]; then \
-        wget -O /tmp/s6-overlay-x86_64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz && \
-        tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
-        rm -rf /tmp/s6-overlay-x86_64.tar.xz; \
-    elif [ "$TARGETARCH" = "arm64" ]; then \
-        wget -O /tmp/s6-overlay-aarch64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-aarch64.tar.xz && \
-        tar -C / -Jxpf /tmp/s6-overlay-aarch64.tar.xz && \
-        rm -rf /tmp/s6-overlay-aarch64.tar.xz; \
-    elif [ "$TARGETARCH" = "arm" ]; then \
-        wget -O /tmp/s6-overlay-armhf.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-armhf.tar.xz && \
-        tar -C / -Jxpf /tmp/s6-overlay-armhf.tar.xz && \
-        rm -rf /tmp/s6-overlay-armhf.tar.xz; \
-    fi
+ARG BUILD_FROM
+FROM $BUILD_FROM
 
 # Install required packages
 RUN apk add --no-cache \
@@ -49,14 +16,26 @@ RUN apk add --no-cache \
     ip6tables \
     net-tools \
     procps \
-    wget
+    wget \
+    unzip
 
 # Install Python dependencies for our web API
 RUN pip3 install --break-system-packages flask-cors
 
-# Copy the built Gluetun binary from builder stage
-COPY --from=builder /gluetun /usr/local/bin/gluetun
-RUN chmod 755 /usr/local/bin/gluetun
+# Download and install Gluetun binary
+ARG GLUETUN_VERSION=v3.40.0
+ARG TARGETARCH
+RUN case "${TARGETARCH}" in \
+        "amd64") GLUETUN_ARCH="amd64" ;; \
+        "arm64") GLUETUN_ARCH="arm64" ;; \
+        "arm") GLUETUN_ARCH="armv6" ;; \
+        *) echo "Unsupported architecture: ${TARGETARCH}" && exit 1 ;; \
+    esac && \
+    wget -O /tmp/gluetun.zip "https://github.com/qdm12/gluetun/releases/download/${GLUETUN_VERSION}/gluetun_${GLUETUN_VERSION}_linux_${GLUETUN_ARCH}.zip" && \
+    unzip /tmp/gluetun.zip -d /tmp/ && \
+    mv /tmp/gluetun /usr/local/bin/gluetun && \
+    chmod 755 /usr/local/bin/gluetun && \
+    rm -rf /tmp/gluetun.zip
 
 # Copy our integration files
 COPY run.sh /addon/run.sh
