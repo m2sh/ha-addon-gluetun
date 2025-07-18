@@ -5,14 +5,28 @@ FROM golang:1.23-alpine AS builder
 # Install build dependencies
 RUN apk add --no-cache git
 
+# Re-declare ARG for this stage
+ARG GLUETUN_VERSION=v3.40.0
+
 # Build Gluetun from source
 RUN git clone --depth 1 --branch ${GLUETUN_VERSION} https://github.com/qdm12/gluetun.git /tmp/gluetun && \
     cd /tmp/gluetun && \
     go build -o /gluetun ./cmd/gluetun
 
-# Final stage - use Home Assistant base image
-ARG BUILD_FROM=ghcr.io/home-assistant/amd64-base:latest
-FROM ${BUILD_FROM}
+# Final stage - use Home Assistant base image (falls back to Alpine for local dev)
+ARG BUILD_FROM
+FROM ${BUILD_FROM:-alpine:3.20}
+
+# Install s6-overlay for local development (Home Assistant base already has it)
+RUN if ! command -v s6-linux-init >/dev/null 2>&1; then \
+        export S6_OVERLAY_VERSION=v3.1.5.0 && \
+        wget -O /tmp/s6-overlay-noarch.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-noarch.tar.xz && \
+        tar -C / -Jxpf /tmp/s6-overlay-noarch.tar.xz && \
+        rm -rf /tmp/s6-overlay-noarch.tar.xz && \
+        wget -O /tmp/s6-overlay-x86_64.tar.xz https://github.com/just-containers/s6-overlay/releases/download/${S6_OVERLAY_VERSION}/s6-overlay-x86_64.tar.xz && \
+        tar -C / -Jxpf /tmp/s6-overlay-x86_64.tar.xz && \
+        rm -rf /tmp/s6-overlay-x86_64.tar.xz; \
+    fi
 
 # Install required packages based on official Gluetun Dockerfile
 RUN apk add --no-cache --update \
@@ -27,7 +41,10 @@ RUN apk add --no-cache --update \
     py3-requests \
     wireguard-tools \
     net-tools \
-    procps
+    procps \
+    curl \
+    jq \
+    bash
 
 # Install OpenVPN 2.5 and 2.6 like official Gluetun
 RUN apk add --no-cache --update -X "https://dl-cdn.alpinelinux.org/alpine/v3.17/main" openvpn~2.5 && \
