@@ -5,7 +5,7 @@ build_from:
   armhf: ghcr.io/home-assistant/armhf-base:latest
   armv7: ghcr.io/home-assistant/armv7-base:latest
   i386: ghcr.io/home-assistant/i386-base:latest
-image: "ha-addon-gluetun-{arch}"
+image: "gluetun-{arch}"
 args:
   GLUETUN_VERSION: "v3.40.0"
 labels:
